@@ -8,7 +8,7 @@ input_folder = Path("nerve_dataset")    # where your .png/.json live
 output_train = Path("dataset_train")    # output: training set
 output_test  = Path("dataset_test")     # output: test set
 train_ratio = 0.8
-random_seed = 42                        # set to None for non-reproducible shuffling
+random_seed = 1                         # set to None for non-reproducible shuffling
 REQUIRE_JSON = True                     # if True, only keep PNGs that have a matching .json
 
 # --- Setup ---
