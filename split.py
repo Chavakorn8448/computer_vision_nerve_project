@@ -1,33 +1,68 @@
 import os
 import random
 import shutil
+from pathlib import Path
 
-# Paths
-input_folder = "dataset"        # folder where all your images are
-output_train = "dataset_train"  # folder to save training images
-output_test = "dataset_test"    # folder to save testing images
+# --- Config ---
+input_folder = Path("nerve_dataset")    # where your .png/.json live
+output_train = Path("dataset_train")    # output: training set
+output_test  = Path("dataset_test")     # output: test set
+train_ratio = 0.8
+random_seed = 42                        # set to None for non-reproducible shuffling
+REQUIRE_JSON = True                     # if True, only keep PNGs that have a matching .json
 
-# Create output folders if they don’t exist
-os.makedirs(output_train, exist_ok=True)
-os.makedirs(output_test, exist_ok=True)
+# --- Setup ---
+output_train.mkdir(parents=True, exist_ok=True)
+output_test.mkdir(parents=True, exist_ok=True)
 
-# List all files
-files = os.listdir(input_folder)
-random.shuffle(files)  # shuffle for randomness
+# Gather PNGs
+png_files = [p for p in input_folder.iterdir() if p.is_file() and (p.suffix.lower() == ".png" or p.suffix.lower() == ".jpg")]
 
-# Split index (80% train, 20% test)
-split_index = int(0.8 * len(files))
+# Keep only pairs if required
+if REQUIRE_JSON:
+    paired_pngs = []
+    missing_json = 0
+    for png in png_files:
+        json_path = png.with_suffix(".json")
+        if json_path.exists():
+            paired_pngs.append(png)
+        else:
+            missing_json += 1
+    png_files = paired_pngs
+else:
+    missing_json = 0
 
-train_files = files[:split_index]
-test_files = files[split_index:]
+# Shuffle
+if random_seed is not None:
+    random.seed(random_seed)
+random.shuffle(png_files)
 
-# Copy train files
-for f in train_files:
-    shutil.copy(os.path.join(input_folder, f), os.path.join(output_train, f))
+# Split
+split_index = int(train_ratio * len(png_files))
+train_pngs = png_files[:split_index]
+test_pngs = png_files[split_index:]
 
-# Copy test files
-for f in test_files:
-    shutil.copy(os.path.join(input_folder, f), os.path.join(output_test, f))
+def copy_pair(png_path: Path, dst_dir: Path):
+    """Copy the .png and its paired .json (if exists) to dst_dir."""
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    # Copy PNG
+    shutil.copy2(png_path, dst_dir / png_path.name)
+    # Copy JSON if present
+    json_src = png_path.with_suffix(".json")
+    if json_src.exists():
+        shutil.copy2(json_src, dst_dir / json_src.name)
 
-print(f"Training images: {len(train_files)}")
-print(f"Testing images: {len(test_files)}")
+# Copy files
+for p in train_pngs:
+    copy_pair(p, output_train)
+
+for p in test_pngs:
+    copy_pair(p, output_test)
+
+print(f"Total PNGs considered: {len(train_pngs) + len(test_pngs)}")
+print(f"Training images (PNG): {len(train_pngs)}")
+print(f"Testing images  (PNG): {len(test_pngs)}")
+if REQUIRE_JSON:
+    print(f"Skipped PNGs without matching JSON: {missing_json}")
+else:
+    print("Note: Some PNGs may not have matching JSON (included).")
