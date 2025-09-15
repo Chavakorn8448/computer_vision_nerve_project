@@ -4,8 +4,8 @@ import cv2
 from pathlib import Path
 from PIL import Image
 
-input_dir = Path("dataset_train")   # folder with .png and .json
-output_mask_dir = Path("dataset_train/masks")  
+input_dir = Path("dataset_test")   # folder with .png
+output_mask_dir = Path("dataset_test/masks")
 output_mask_dir.mkdir(parents=True, exist_ok=True)
 
 for json_file in input_dir.glob("*.json"):
