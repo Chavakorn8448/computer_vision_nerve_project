@@ -9,7 +9,7 @@ test_img_dir = Path("dataset_test")
 test_mask_dir = test_img_dir / "masks"
 
 # Load trained model
-model = tf.keras.models.load_model("nerve_unet_model.keras")
+model = tf.keras.models.load_model("Model_save_test.keras")
 
 # Load test images & masks
 def load_data(image_dir, mask_dir, img_size=(256,256)):

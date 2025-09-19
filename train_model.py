@@ -142,6 +142,14 @@ callbacks = [
         mode='max',
         restore_best_weights=True,
         verbose=1
+    ),
+    # Early stopping based on accuracy to prevent overfitting
+    tf.keras.callbacks.EarlyStopping(
+        monitor='val_accuracy',
+        patience=5,  # Stop if val_accuracy does not improve for 5 epochs
+        mode='max',
+        restore_best_weights=True,
+        verbose=1
     )
 ]
 
@@ -157,8 +165,8 @@ history = model.fit(
 )
 
 # Save final model
-model.save("final_nerve_unet_model.keras")
-
+model.save("Model_save_test.keras")
+print("Final model saved.")
 # Plot training history
 plot_training_history(history)
 
