@@ -2,14 +2,23 @@ import numpy as np
 from pathlib import Path
 from PIL import Image
 import tensorflow as tf
+from losses import dice_loss, dice_coefficient, combined_loss
 from CNN_model import build_unet  # Only if you need to rebuild, otherwise skip
+from tensorflow.keras.models import load_model
 
 # Paths
 test_img_dir = Path("dataset_test")
 test_mask_dir = test_img_dir / "masks"
 
 # Load trained model
-model = tf.keras.models.load_model("Model_save_test.keras")
+model = load_model(
+    "Model_save_test.keras",
+    custom_objects={
+        "combined_loss": combined_loss,
+        "dice_loss": dice_loss,
+        "dice_coefficient": dice_coefficient
+    }
+)
 
 # Load test images & masks
 def load_data(image_dir, mask_dir, img_size=(256,256)):

@@ -1,4 +1,5 @@
-from CNN_model import build_unet, dice_loss, dice_coefficient
+from CNN_model import build_unet
+from losses import dice_loss, dice_coefficient, combined_loss
 import numpy as np
 from PIL import Image
 from pathlib import Path
